@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../redux/store';
 import {
-  Mailing,
   removeMailing,
   updateMailing,
   addMailing,
@@ -21,6 +20,7 @@ import {
 } from '@mui/material';
 import MailingForm from '../MailingForm/MailingForm';
 import { ConfirmationModal } from '../Modals/ConfirmationModal';
+import { Mailing } from '../../types';
 
 const MailingsTable: React.FC = () => {
   const mailings = useSelector((state: RootState) => state.mailings.mailings);
@@ -60,7 +60,16 @@ const MailingsTable: React.FC = () => {
     const newMailing: Mailing = {
       id: Date.now(),
       name: 'Новая рассылка',
-      giftCard: null,
+      giftCards: [],
+      // giftCards: [
+      //   {
+      //     id: 0,
+      //     name: 'test',
+      //     remainingQuantity: 0,
+      //     expirationDate: 'test',
+      //     price: 0,
+      //   },
+      // ],
       giftsSent: 0,
       daysToClaim: 0,
       daysToReceive: 0,

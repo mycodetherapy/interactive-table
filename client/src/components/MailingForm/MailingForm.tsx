@@ -1,19 +1,15 @@
 import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { TextField, Button, Box, Chip } from '@mui/material';
+import { useSelector, useDispatch } from 'react-redux';
 import {
-  TextField,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-} from '@mui/material';
-import { Mailing } from '../../redux/mailingsSlice';
+  decrementGiftCardQuantity,
+  incrementGiftCardQuantity,
+} from '../../redux/giftCardSlice';
+import { RootState } from '../../redux/store';
+import GiftCardDialog from '../GiftCardDialog/GiftCardDialog';
+import { Mailing } from '../../types';
 
 interface GiftCard {
   id: number;
@@ -23,54 +19,19 @@ interface GiftCard {
   price: number;
 }
 
-const giftCards: GiftCard[] = [
-  {
-    id: 1,
-    name: 'Gift Card 1',
-    remainingQuantity: 10,
-    expirationDate: '2024-07-10',
-    price: 100,
-  },
-  {
-    id: 2,
-    name: 'Gift Card 2',
-    remainingQuantity: 5,
-    expirationDate: '2024-07-15',
-    price: 50,
-  },
-  {
-    id: 3,
-    name: 'Gift Card 3',
-    remainingQuantity: 8,
-    expirationDate: '2024-07-20',
-    price: 75,
-  },
-  {
-    id: 4,
-    name: 'Gift Card 4',
-    remainingQuantity: 15,
-    expirationDate: '2024-08-01',
-    price: 150,
-  },
-  {
-    id: 5,
-    name: 'Gift Card 5',
-    remainingQuantity: 2,
-    expirationDate: '2024-06-30',
-    price: 25,
-  },
-  {
-    id: 6,
-    name: 'Gift Card 6',
-    remainingQuantity: 20,
-    expirationDate: '2024-08-10',
-    price: 200,
-  },
-];
-
 const validationSchema = Yup.object({
   name: Yup.string().required('Название рассылки обязательно'),
-  giftCard: Yup.object().required('Выбор подарка обязателен'),
+  giftCards: Yup.array()
+    .of(
+      Yup.object({
+        id: Yup.number().required(),
+        name: Yup.string().required(),
+        remainingQuantity: Yup.number().required(),
+        expirationDate: Yup.string().required(),
+        price: Yup.number().required(),
+      })
+    )
+    .required('Выбор подарков обязателен'),
   giftsSent: Yup.number()
     .min(1, 'Кол-во подарков должно быть больше 0')
     .required('Кол-во подарков обязательно'),
@@ -93,6 +54,10 @@ const MailingForm: React.FC<{
   initialValues: any;
   onSubmit: (values: Mailing) => void;
 }> = ({ initialValues, onSubmit }) => {
+  const dispatch = useDispatch();
+  const giftCards = useSelector(
+    (state: RootState) => state.giftCards.giftCards
+  );
   const [isGiftCardDialogOpen, setIsGiftCardDialogOpen] = useState(false);
 
   const formik = useFormik({
@@ -102,8 +67,39 @@ const MailingForm: React.FC<{
   });
 
   const handleGiftCardSelect = (giftCard: GiftCard) => {
-    formik.setFieldValue('giftCard', giftCard);
-    setIsGiftCardDialogOpen(false);
+    const selectedCards = formik.values.giftCards || [];
+    const existingCard = selectedCards.find(
+      (card: GiftCard) => card.id === giftCard.id
+    );
+
+    if (existingCard) {
+      existingCard.remainingQuantity += 1;
+    } else {
+      selectedCards.push({ ...giftCard, remainingQuantity: 1 });
+    }
+
+    formik.setFieldValue('giftCards', selectedCards);
+    dispatch(decrementGiftCardQuantity(giftCard.id));
+  };
+
+  const handleGiftCardRemove = (giftCardId: number) => {
+    const selectedCards = formik.values.giftCards || [];
+    const cardToRemove = selectedCards.find(
+      (card: GiftCard) => card.id === giftCardId
+    );
+
+    if (cardToRemove) {
+      cardToRemove.remainingQuantity -= 1;
+      if (cardToRemove.remainingQuantity === 0) {
+        const updatedCards = selectedCards.filter(
+          (card: GiftCard) => card.id !== giftCardId
+        );
+        formik.setFieldValue('giftCards', updatedCards);
+      } else {
+        formik.setFieldValue('giftCards', [...selectedCards]);
+      }
+      dispatch(incrementGiftCardQuantity(giftCardId));
+    }
   };
 
   return (
@@ -121,12 +117,18 @@ const MailingForm: React.FC<{
       <Button variant='outlined' onClick={() => setIsGiftCardDialogOpen(true)}>
         Выбрать подарок
       </Button>
-      {formik.values.giftCard && (
-        <div>
-          <Typography variant='body1'>
-            Выбранный подарок: {formik.values.giftCard.name}
-          </Typography>
-        </div>
+      {formik.values.giftCards && (
+        <Box display='flex' flexWrap='wrap' mt={2}>
+          {formik.values.giftCards.map((giftCard: GiftCard) => (
+            <Chip
+              key={giftCard.id}
+              label={`${giftCard.name} (${giftCard.remainingQuantity})`}
+              onDelete={() => handleGiftCardRemove(giftCard.id)}
+              color='primary'
+              style={{ margin: 4 }}
+            />
+          ))}
+        </Box>
       )}
       <TextField
         label='Кол-во подарков'
@@ -187,38 +189,15 @@ const MailingForm: React.FC<{
         Сохранить
       </Button>
 
-      <Dialog
+      <GiftCardDialog
         open={isGiftCardDialogOpen}
         onClose={() => setIsGiftCardDialogOpen(false)}
-      >
-        <DialogTitle>Выберите подарок</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2}>
-            {giftCards.map((card) => (
-              <Grid item xs={4} key={card.id}>
-                <Card onClick={() => handleGiftCardSelect(card)}>
-                  <CardContent>
-                    <Typography variant='h6'>{card.name}</Typography>
-                    <Typography>Осталось: {card.remainingQuantity}</Typography>
-                    <Typography>
-                      Дата сгорания: {card.expirationDate}
-                    </Typography>
-                    <Typography>Номинал: {card.price}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setIsGiftCardDialogOpen(false)}
-            color='primary'
-          >
-            Отмена
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onAdd={() => setIsGiftCardDialogOpen(false)}
+        giftCards={giftCards}
+        selectedGiftCards={formik.values.giftCards}
+        onSelect={handleGiftCardSelect}
+        onRemove={handleGiftCardRemove}
+      />
     </form>
   );
 };

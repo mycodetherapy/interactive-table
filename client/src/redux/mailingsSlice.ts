@@ -1,24 +1,5 @@
 import { AnyAction } from 'redux';
-
-export interface Mailing {
-  id: number;
-  name: string;
-  date: string;
-  giftsSent: number;
-  giftCard: GiftCard | null;
-  daysToClaim: number;
-  daysToReceive: number;
-  description: string;
-  cardNumbers: string;
-}
-
-type GiftCard = {
-  expirationDate: string;
-  id: number;
-  name: string;
-  pric: number;
-  remainingQuantity: number;
-};
+import { Mailing } from '../types';
 
 interface MailingState {
   mailings: Mailing[];
