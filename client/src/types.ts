@@ -2,7 +2,7 @@ export type GiftCard = {
   id: number;
   name: string;
   remainingQuantity: number;
-  expirationDate: string;
+  expirationDate: Date;
   price: number;
 };
 
@@ -15,7 +15,7 @@ export type Mailing = {
   id: number;
   name: string;
   giftCards: GiftCard[];
-  date: string;
+  date: Date;
   daysToClaim: number;
   daysToReceive: number;
   description: string;

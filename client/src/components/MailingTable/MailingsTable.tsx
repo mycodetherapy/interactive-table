@@ -22,6 +22,7 @@ import MailingForm from '../MailingForm/MailingForm';
 import { ConfirmationModal } from '../Modals/ConfirmationModal';
 import { GiftCard, Mailing, RestockGift } from '../../types';
 import { restockGiftCards } from '../../redux/giftCardSlice';
+import moment from 'moment';
 
 const MailingsTable: React.FC = () => {
   const mailings = useSelector((state: RootState) => state.mailings.mailings);
@@ -42,7 +43,7 @@ const MailingsTable: React.FC = () => {
       daysToReceive: 0,
       description: '',
       cardNumbers: '',
-      date: new Date().toISOString().substring(0, 10),
+      date: new Date(),
     };
     setEditingMailing(newMailing);
     handleShowForm();
@@ -123,7 +124,7 @@ const MailingsTable: React.FC = () => {
           {mailings.map((mailing) => (
             <TableRow key={mailing.id}>
               <TableCell>{mailing.name}</TableCell>
-              <TableCell>{mailing.date}</TableCell>
+              <TableCell>{moment(mailing.date).format('DD.MM.YYYY')}</TableCell>
               <TableCell>{totalRemainingQuantity(mailing.giftCards)}</TableCell>
               <TableCell>
                 <Button

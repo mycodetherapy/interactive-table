@@ -7,22 +7,20 @@ import {
   incrementGiftCardQuantity,
 } from '../../redux/giftCardSlice';
 import GiftCardDialog from '../GiftCardDialog/GiftCardDialog';
-import { Mailing } from '../../types';
+import { GiftCard, Mailing } from '../../types';
 import { validationMailingFormSchema as validationSchema } from '../../validation/validationMailingForm';
 
-interface GiftCard {
-  id: number;
-  name: string;
-  remainingQuantity: number;
-  expirationDate: string;
-  price: number;
-}
-
-const MailingForm: React.FC<{
+interface MailingFormProps {
   initialValues: any;
   onSubmit: (values: Mailing) => void;
   onClose: () => void;
-}> = ({ initialValues, onSubmit, onClose }) => {
+}
+
+const MailingForm: React.FC<MailingFormProps> = ({
+  initialValues,
+  onSubmit,
+  onClose,
+}) => {
   const dispatch = useDispatch();
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
 

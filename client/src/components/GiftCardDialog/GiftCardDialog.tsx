@@ -16,6 +16,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { GiftCard } from '../../types';
 import { RootState } from '../../redux/store';
+import moment from 'moment';
 
 interface GiftCardDialogProps {
   open: boolean;
@@ -48,6 +49,10 @@ const GiftCardDialog: React.FC<GiftCardDialogProps> = ({
             const selectedQuantity = selectedCard
               ? selectedCard.remainingQuantity
               : 0;
+            const isExpired = moment(card.expirationDate).isBefore(
+              new Date(),
+              'day'
+            );
 
             return (
               <Grid item xs={4} key={card.id}>
@@ -56,7 +61,8 @@ const GiftCardDialog: React.FC<GiftCardDialogProps> = ({
                     <Typography variant='h6'>{card.name}</Typography>
                     <Typography>Осталось: {card.remainingQuantity}</Typography>
                     <Typography>
-                      Дата сгорания: {card.expirationDate}
+                      Дата сгорания:{' '}
+                      {moment(card.expirationDate).format('DD.MM.YYYY')}
                     </Typography>
                     <Typography>Номинал: {card.price}</Typography>
                     <Box
@@ -74,7 +80,7 @@ const GiftCardDialog: React.FC<GiftCardDialogProps> = ({
                         color='primary'
                         variant='contained'
                         startIcon={<AddIcon />}
-                        disabled={card.remainingQuantity === 0}
+                        disabled={card.remainingQuantity === 0 || isExpired}
                         size='small'
                         sx={{ minHeight: '31px' }}
                       >
