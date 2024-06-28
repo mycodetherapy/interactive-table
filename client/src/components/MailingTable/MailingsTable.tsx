@@ -20,7 +20,8 @@ import {
 } from '@mui/material';
 import MailingForm from '../MailingForm/MailingForm';
 import { ConfirmationModal } from '../Modals/ConfirmationModal';
-import { Mailing } from '../../types';
+import { GiftCard, Mailing, RestockGift } from '../../types';
+import { restockGiftCards } from '../../redux/giftCardSlice';
 
 const MailingsTable: React.FC = () => {
   const mailings = useSelector((state: RootState) => state.mailings.mailings);
@@ -32,9 +33,24 @@ const MailingsTable: React.FC = () => {
   const isExistMailing = (currentId: number) =>
     !!mailings.find((mailing) => mailing.id === currentId);
 
+  const handleCreate = () => {
+    const newMailing: Mailing = {
+      id: Date.now(),
+      name: 'Новая рассылка',
+      giftCards: [],
+      daysToClaim: 0,
+      daysToReceive: 0,
+      description: '',
+      cardNumbers: '',
+      date: new Date().toISOString().substring(0, 10),
+    };
+    setEditingMailing(newMailing);
+    handleShowForm();
+  };
+
   const handleEdit = (newMailing: Mailing) => {
     setEditingMailing(newMailing);
-    setFormOpen(!formOpen);
+    handleShowForm();
   };
   const handleConfirmation = (newMailing: Mailing) => {
     setEditingMailing(newMailing);
@@ -48,37 +64,8 @@ const MailingsTable: React.FC = () => {
         ? dispatch(updateMailing(editingMailing))
         : dispatch(addMailing(editingMailing));
       handleShowConfirmation();
-      setFormOpen(!formOpen);
+      handleShowForm();
     }
-  };
-
-  const handleShowConfirmation = () => {
-    setConfirmMoalOpen(!confirmMoalOpen);
-  };
-
-  const handleCreate = () => {
-    const newMailing: Mailing = {
-      id: Date.now(),
-      name: 'Новая рассылка',
-      giftCards: [],
-      // giftCards: [
-      //   {
-      //     id: 0,
-      //     name: 'test',
-      //     remainingQuantity: 0,
-      //     expirationDate: 'test',
-      //     price: 0,
-      //   },
-      // ],
-      giftsSent: 0,
-      daysToClaim: 0,
-      daysToReceive: 0,
-      description: '',
-      cardNumbers: '',
-      date: new Date().toISOString().substring(0, 10),
-    };
-    setEditingMailing(newMailing);
-    setFormOpen(!formOpen);
   };
 
   const confirmModalData = () => {
@@ -92,6 +79,29 @@ const MailingsTable: React.FC = () => {
       data.acceptTitle = `Создать ${data.acceptTitle}`;
     }
     return data;
+  };
+
+  const handleShowConfirmation = () => {
+    setConfirmMoalOpen(!confirmMoalOpen);
+  };
+
+  const handleShowForm = () => {
+    setFormOpen(!formOpen);
+  };
+
+  const handleRemoveMailing = (
+    mailingId: number,
+    restockGifts: RestockGift[]
+  ) => {
+    dispatch(removeMailing(mailingId));
+    dispatch(restockGiftCards(restockGifts));
+  };
+
+  const totalRemainingQuantity = (giftCards: GiftCard[]): number => {
+    return giftCards.reduce(
+      (total, giftCard) => total + giftCard.remainingQuantity,
+      0
+    );
   };
 
   return (
@@ -114,11 +124,19 @@ const MailingsTable: React.FC = () => {
             <TableRow key={mailing.id}>
               <TableCell>{mailing.name}</TableCell>
               <TableCell>{mailing.date}</TableCell>
-              <TableCell>{mailing.giftsSent}</TableCell>
+              <TableCell>{totalRemainingQuantity(mailing.giftCards)}</TableCell>
               <TableCell>
                 <Button
                   color='secondary'
-                  onClick={() => dispatch(removeMailing(mailing.id))}
+                  onClick={() => {
+                    const restockGifts: RestockGift[] = mailing.giftCards.map(
+                      (card: GiftCard) => ({
+                        id: card.id,
+                        quantity: card.remainingQuantity,
+                      })
+                    );
+                    handleRemoveMailing(mailing.id, restockGifts);
+                  }}
                 >
                   Удалить
                 </Button>
@@ -139,6 +157,7 @@ const MailingsTable: React.FC = () => {
             <MailingForm
               initialValues={editingMailing}
               onSubmit={handleConfirmation}
+              onClose={handleShowForm}
             />
           )}
         </DialogContent>

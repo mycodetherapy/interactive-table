@@ -1,5 +1,5 @@
 import { AnyAction } from 'redux';
-import { GiftCard } from '../types';
+import { GiftCard, RestockGift } from '../types';
 
 interface GiftCardsState {
   giftCards: GiftCard[];
@@ -54,6 +54,7 @@ const initialState: GiftCardsState = {
 
 const DECREMENT_GIFT_CARD_QUANTITY = 'giftCards/decrementGiftCardQuantity';
 const INCREMENT_GIFT_CARD_QUANTITY = 'giftCards/incrementGiftCardQuantity';
+const RESTOCK_GIFT_CARDS = 'giftCards/restockGiftCards';
 
 export const decrementGiftCardQuantity = (id: number) => ({
   type: DECREMENT_GIFT_CARD_QUANTITY,
@@ -63,6 +64,11 @@ export const decrementGiftCardQuantity = (id: number) => ({
 export const incrementGiftCardQuantity = (id: number) => ({
   type: INCREMENT_GIFT_CARD_QUANTITY,
   payload: id,
+});
+
+export const restockGiftCards = (restockItems: RestockGift[]) => ({
+  type: RESTOCK_GIFT_CARDS,
+  payload: restockItems,
 });
 
 const giftCardsSliceReducer = (
@@ -87,6 +93,22 @@ const giftCardsSliceReducer = (
             ? { ...giftCard, remainingQuantity: giftCard.remainingQuantity + 1 }
             : giftCard
         ),
+      };
+    case RESTOCK_GIFT_CARDS:
+      return {
+        ...state,
+        giftCards: state.giftCards.map((giftCard) => {
+          const restockGift = action.payload.find(
+            (item: GiftCard) => item.id === giftCard.id
+          );
+          return restockGift
+            ? {
+                ...giftCard,
+                remainingQuantity:
+                  giftCard.remainingQuantity + restockGift.quantity,
+              }
+            : giftCard;
+        }),
       };
     default:
       return state;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
   Dialog,
   DialogTitle,
@@ -14,17 +14,12 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import {
-  decrementGiftCardQuantity,
-  incrementGiftCardQuantity,
-} from '../../redux/giftCardSlice';
 import { GiftCard } from '../../types';
+import { RootState } from '../../redux/store';
 
 interface GiftCardDialogProps {
   open: boolean;
   onClose: () => void;
-  onAdd: () => void;
-  giftCards: GiftCard[];
   selectedGiftCards: GiftCard[];
   onSelect: (giftCard: GiftCard) => void;
   onRemove: (giftCardId: number) => void;
@@ -33,23 +28,13 @@ interface GiftCardDialogProps {
 const GiftCardDialog: React.FC<GiftCardDialogProps> = ({
   open,
   onClose,
-  onAdd,
-  giftCards,
   selectedGiftCards,
   onSelect,
   onRemove,
 }) => {
-  const dispatch = useDispatch();
-
-  const handleSelect = (giftCard: GiftCard) => {
-    onSelect(giftCard);
-    dispatch(decrementGiftCardQuantity(giftCard.id));
-  };
-
-  const handleRemove = (giftCardId: number) => {
-    onRemove(giftCardId);
-    dispatch(incrementGiftCardQuantity(giftCardId));
-  };
+  const giftCards = useSelector(
+    (state: RootState) => state.giftCards.giftCards
+  );
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -76,13 +61,16 @@ const GiftCardDialog: React.FC<GiftCardDialogProps> = ({
                     <Typography>Номинал: {card.price}</Typography>
                     <Box
                       sx={{
-                        minHeight: '31px',
                         display: 'flex',
                         justifyContent: 'space-between',
+                        paddingTop: '12px',
+                        '& .MuiButton-startIcon': {
+                          margin: 0,
+                        },
                       }}
                     >
                       <Button
-                        onClick={() => handleSelect(card)}
+                        onClick={() => onSelect(card)}
                         color='primary'
                         variant='contained'
                         startIcon={<AddIcon />}
@@ -92,16 +80,16 @@ const GiftCardDialog: React.FC<GiftCardDialogProps> = ({
                       >
                         {selectedQuantity > 0 && `(${selectedQuantity})`}
                       </Button>
-                      {selectedQuantity > 0 && (
-                        <Button
-                          onClick={() => handleRemove(card.id)}
-                          color='secondary'
-                          variant='contained'
-                          startIcon={<RemoveIcon />}
-                          size='small'
-                          sx={{ minHeight: '31px' }}
-                        />
-                      )}
+
+                      <Button
+                        onClick={() => onRemove(card.id)}
+                        color='secondary'
+                        variant='contained'
+                        startIcon={<RemoveIcon />}
+                        disabled={!selectedQuantity}
+                        size='small'
+                        sx={{ minHeight: '31px', margin: 0 }}
+                      />
                     </Box>
                   </CardContent>
                 </Card>
@@ -114,7 +102,7 @@ const GiftCardDialog: React.FC<GiftCardDialogProps> = ({
         <Button onClick={onClose} color='primary'>
           Отмена
         </Button>
-        <Button onClick={onAdd} color='primary'>
+        <Button onClick={onClose} color='primary'>
           Добавить
         </Button>
       </DialogActions>
