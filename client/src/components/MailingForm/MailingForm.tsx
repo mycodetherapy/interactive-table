@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
-import { TextField, Button, Box, Chip } from '@mui/material';
+import { TextField, Button, Box, Chip, Autocomplete } from '@mui/material';
 import { useDispatch } from 'react-redux';
 import {
   decrementGiftCardQuantity,
@@ -86,22 +86,35 @@ const MailingForm: React.FC<MailingFormProps> = ({
         fullWidth
         margin='normal'
       />
-      <Button variant='outlined' onClick={handleShowGiftDialog}>
-        Выбрать подарок
-      </Button>
-      {formik.values.giftCards && (
-        <Box display='flex' flexWrap='wrap' mt={2}>
-          {formik.values.giftCards.map((giftCard: GiftCard) => (
+      <Autocomplete
+        multiple
+        id='gift-cards'
+        options={[]}
+        disableClearable
+        value={formik.values.giftCards}
+        renderTags={(value: GiftCard[], getTagProps) =>
+          value.map((option: GiftCard, index: number) => (
             <Chip
-              key={giftCard.id}
-              label={`${giftCard.name} (${giftCard.remainingQuantity})`}
-              onDelete={() => handleGiftCardRemove(giftCard.id)}
+              key={option.id}
+              label={`${option.name} (${option.remainingQuantity})`}
+              onDelete={() => handleGiftCardRemove(option.id)}
               color='primary'
               style={{ margin: 4 }}
             />
-          ))}
-        </Box>
-      )}
+          ))
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            variant='outlined'
+            label='Выберите подарки'
+            placeholder='Выберите подарки'
+            error={formik.touched.giftCards && Boolean(formik.errors.giftCards)}
+            helperText={formik.touched.giftCards && formik.errors.giftCards}
+            onClick={handleShowGiftDialog}
+          />
+        )}
+      />
       <TextField
         label='Кол-во дней на взятие подарка'
         name='daysToClaim'
@@ -135,6 +148,9 @@ const MailingForm: React.FC<MailingFormProps> = ({
         helperText={formik.touched.description && formik.errors.description}
         fullWidth
         margin='normal'
+        multiline
+        rows={2}
+        maxRows={4}
       />
       <TextField
         label='Номера карт'

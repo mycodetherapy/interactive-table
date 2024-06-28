@@ -1,17 +1,7 @@
 import * as Yup from 'yup';
 export const validationMailingFormSchema = Yup.object({
   name: Yup.string().required('Название рассылки обязательно'),
-  giftCards: Yup.array()
-    .of(
-      Yup.object({
-        id: Yup.number().required(),
-        name: Yup.string().required(),
-        remainingQuantity: Yup.number().required(),
-        expirationDate: Yup.string().required(),
-        price: Yup.number().required(),
-      })
-    )
-    .required('Выбор подарков обязателен'),
+  giftCards: Yup.array().min(1, 'Выбор подарков обязателен'),
   daysToClaim: Yup.number()
     .min(2, 'Кол-во дней на взятие должно быть не менее 2')
     .required('Кол-во дней на взятие обязательно'),
