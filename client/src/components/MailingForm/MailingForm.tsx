@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useFormik } from 'formik';
 import { TextField, Button, Box, Chip, Autocomplete } from '@mui/material';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   decrementGiftCardQuantity,
   incrementGiftCardQuantity,
 } from '../../redux/giftCardSlice';
 import GiftCardDialog from '../GiftCardDialog/GiftCardDialog';
-import { GiftCard, Mailing } from '../../types';
+import { GiftCard, Mailing, MailingGift } from '../../types';
 import { validationMailingFormSchema as validationSchema } from '../../validation/validationMailingForm';
+import { RootState } from '../../redux/store';
 
 interface MailingFormProps {
   initialValues: any;
@@ -23,6 +24,17 @@ const MailingForm: React.FC<MailingFormProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
+  const giftCards = useSelector(
+    (state: RootState) => state.giftCards.giftCards
+  );
+
+  const giftCardMap = useMemo(() => {
+    const map: Record<number, GiftCard> = {};
+    giftCards.forEach((card) => {
+      map[card.id] = card;
+    });
+    return map;
+  }, [giftCards]);
 
   useEffect(() => {
     return () => onClose();
@@ -35,36 +47,40 @@ const MailingForm: React.FC<MailingFormProps> = ({
   });
 
   const handleGiftCardSelect = (giftCard: GiftCard) => {
-    const selectedCards = formik.values.giftCards || [];
-    const existingCard = selectedCards.find(
-      (card: GiftCard) => card.id === giftCard.id
+    const selectedGifts = formik.values.gifts || [];
+    const existingGift = selectedGifts.find(
+      (gift: MailingGift) => gift.giftCardId === giftCard.id
     );
 
-    if (existingCard) {
-      existingCard.remainingQuantity += 1;
+    if (existingGift) {
+      existingGift.quantity += 1;
     } else {
-      selectedCards.push({ ...giftCard, remainingQuantity: 1 });
+      selectedGifts.push({
+        mailingId: formik.values.id,
+        giftCardId: giftCard.id,
+        quantity: 1,
+      });
     }
 
-    formik.setFieldValue('giftCards', selectedCards);
+    formik.setFieldValue('gifts', selectedGifts);
     dispatch(decrementGiftCardQuantity(giftCard.id));
   };
 
   const handleGiftCardRemove = (giftCardId: number) => {
-    const selectedCards = formik.values.giftCards || [];
-    const cardToRemove = selectedCards.find(
-      (card: GiftCard) => card.id === giftCardId
+    const selectedGifts = formik.values.gifts || [];
+    const giftToRemove = selectedGifts.find(
+      (gift: MailingGift) => gift.giftCardId === giftCardId
     );
 
-    if (cardToRemove) {
-      cardToRemove.remainingQuantity -= 1;
-      if (cardToRemove.remainingQuantity === 0) {
-        const updatedCards = selectedCards.filter(
-          (card: GiftCard) => card.id !== giftCardId
+    if (giftToRemove) {
+      giftToRemove.quantity -= 1;
+      if (giftToRemove.quantity === 0) {
+        const updatedGifts = selectedGifts.filter(
+          (gift: MailingGift) => gift.giftCardId !== giftCardId
         );
-        formik.setFieldValue('giftCards', updatedCards);
+        formik.setFieldValue('gifts', updatedGifts);
       } else {
-        formik.setFieldValue('giftCards', [...selectedCards]);
+        formik.setFieldValue('gifts', [...selectedGifts]);
       }
       dispatch(incrementGiftCardQuantity(giftCardId));
     }
@@ -88,20 +104,23 @@ const MailingForm: React.FC<MailingFormProps> = ({
       />
       <Autocomplete
         multiple
-        id='gift-cards'
+        id='gifts'
         options={[]}
         disableClearable
-        value={formik.values.giftCards}
-        renderTags={(value: GiftCard[], getTagProps) =>
-          value.map((option: GiftCard, index: number) => (
-            <Chip
-              key={option.id}
-              label={`${option.name} (${option.remainingQuantity})`}
-              onDelete={() => handleGiftCardRemove(option.id)}
-              color='primary'
-              style={{ margin: 4 }}
-            />
-          ))
+        value={formik.values.gifts}
+        renderTags={(value: MailingGift[]) =>
+          value.map((option: MailingGift, index: number) => {
+            const giftCard = giftCardMap[option.giftCardId];
+            return (
+              <Chip
+                key={option.giftCardId}
+                label={`${giftCard.name} (${option.quantity})`}
+                onDelete={() => handleGiftCardRemove(option.giftCardId)}
+                color='primary'
+                style={{ margin: 4 }}
+              />
+            );
+          })
         }
         renderInput={(params) => (
           <TextField
@@ -109,8 +128,8 @@ const MailingForm: React.FC<MailingFormProps> = ({
             variant='outlined'
             label='Выберите подарки'
             placeholder='Выберите подарки'
-            error={formik.touched.giftCards && Boolean(formik.errors.giftCards)}
-            helperText={formik.touched.giftCards && formik.errors.giftCards}
+            error={formik.touched.gifts && Boolean(formik.errors.gifts)}
+            helperText={formik.touched.gifts && formik.errors.gifts}
             onClick={handleShowGiftDialog}
           />
         )}
@@ -173,7 +192,7 @@ const MailingForm: React.FC<MailingFormProps> = ({
       <GiftCardDialog
         open={isGiftDialogOpen}
         onClose={handleShowGiftDialog}
-        selectedGiftCards={formik.values.giftCards}
+        selectedGiftCards={formik.values.gifts}
         onSelect={handleGiftCardSelect}
         onRemove={handleGiftCardRemove}
       />

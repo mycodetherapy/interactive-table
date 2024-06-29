@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import MailingForm from '../MailingForm/MailingForm';
 import { ConfirmationModal } from '../Modals/ConfirmationModal';
-import { GiftCard, Mailing, RestockGift } from '../../types';
+import { Mailing, MailingGift, RestockGift } from '../../types';
 import { restockGiftCards } from '../../redux/giftCardSlice';
 import moment from 'moment';
 
@@ -34,13 +34,11 @@ const MailingsTable: React.FC = () => {
   const isExistMailing = (currentId: number) =>
     !!mailings.find((mailing) => mailing.id === currentId);
 
-  console.log('mailings', mailings);
-
   const handleCreate = () => {
     const newMailing: Mailing = {
       id: Date.now(),
       name: 'Новая рассылка',
-      giftCards: [],
+      gifts: [],
       daysToClaim: 0,
       daysToReceive: 0,
       description: '',
@@ -100,11 +98,8 @@ const MailingsTable: React.FC = () => {
     dispatch(restockGiftCards(restockGifts));
   };
 
-  const totalRemainingQuantity = (giftCards: GiftCard[]): number => {
-    return giftCards.reduce(
-      (total, giftCard) => total + giftCard.remainingQuantity,
-      0
-    );
+  const totalRemainingQuantity = (gifts: MailingGift[]): number => {
+    return gifts.reduce((total, gifts) => total + gifts.quantity, 0);
   };
 
   return (
@@ -127,15 +122,15 @@ const MailingsTable: React.FC = () => {
             <TableRow key={mailing.id}>
               <TableCell>{mailing.name}</TableCell>
               <TableCell>{moment(mailing.date).format('DD.MM.YYYY')}</TableCell>
-              <TableCell>{totalRemainingQuantity(mailing.giftCards)}</TableCell>
+              <TableCell>{totalRemainingQuantity(mailing.gifts)}</TableCell>
               <TableCell>
                 <Button
                   color='secondary'
                   onClick={() => {
-                    const restockGifts: RestockGift[] = mailing.giftCards.map(
-                      (card: GiftCard) => ({
-                        id: card.id,
-                        quantity: card.remainingQuantity,
+                    const restockGifts: RestockGift[] = mailing.gifts.map(
+                      (card: MailingGift) => ({
+                        id: card.giftCardId,
+                        quantity: card.quantity,
                       })
                     );
                     handleRemoveMailing(mailing.id, restockGifts);

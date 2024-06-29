@@ -9,7 +9,6 @@ export type GiftCard = {
 export type MailingGift = {
   mailingId: number;
   giftCardId: number;
-  giftName: string;
   quantity: number;
 };
 
@@ -21,8 +20,7 @@ export type RestockGift = {
 export type Mailing = {
   id: number;
   name: string;
-  giftCards: GiftCard[];
-  // gifts: MailingGift[];
+  gifts: MailingGift[];
   date: Date;
   daysToClaim: number;
   daysToReceive: number;

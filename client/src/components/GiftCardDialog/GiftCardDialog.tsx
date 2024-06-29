@@ -14,14 +14,14 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { GiftCard } from '../../types';
+import { GiftCard, MailingGift } from '../../types';
 import { RootState } from '../../redux/store';
 import moment from 'moment';
 
 interface GiftCardDialogProps {
   open: boolean;
   onClose: () => void;
-  selectedGiftCards: GiftCard[];
+  selectedGiftCards: MailingGift[];
   onSelect: (giftCard: GiftCard) => void;
   onRemove: (giftCardId: number) => void;
 }
@@ -44,11 +44,9 @@ const GiftCardDialog: React.FC<GiftCardDialogProps> = ({
         <Grid container spacing={2}>
           {giftCards.map((card) => {
             const selectedCard = selectedGiftCards.find(
-              (selectedCard) => selectedCard.id === card.id
+              (selectedCard) => selectedCard.giftCardId === card.id
             );
-            const selectedQuantity = selectedCard
-              ? selectedCard.remainingQuantity
-              : 0;
+            const selectedQuantity = selectedCard ? selectedCard.quantity : 0;
             const isExpired = moment(card.expirationDate).isBefore(
               new Date(),
               'day'
