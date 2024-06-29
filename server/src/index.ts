@@ -10,8 +10,8 @@ const PORT = 3001;
 app.use(cors());
 app.use(bodyParser.json());
 
-app.use('/api', mailingRoutes);
-app.use('/api', giftCardRoutes);
+app.use('/api/v1', mailingRoutes);
+app.use('/api/v1', giftCardRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
