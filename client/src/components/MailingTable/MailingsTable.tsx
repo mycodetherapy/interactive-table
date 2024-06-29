@@ -34,6 +34,8 @@ const MailingsTable: React.FC = () => {
   const isExistMailing = (currentId: number) =>
     !!mailings.find((mailing) => mailing.id === currentId);
 
+  console.log('mailings', mailings);
+
   const handleCreate = () => {
     const newMailing: Mailing = {
       id: Date.now(),
