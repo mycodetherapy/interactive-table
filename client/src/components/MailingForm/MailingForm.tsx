@@ -10,11 +10,9 @@ import GiftCardDialog from '../GiftCardDialog/GiftCardDialog';
 import { GiftCard, Mailing, MailingGift } from '../../types';
 import { validationMailingFormSchema as validationSchema } from '../../validation/validationMailingForm';
 import { RootState } from '../../redux/store';
-import {
-  fetchGiftCards,
-  fetchGiftCardsByIds,
-  saveGiftCards,
-} from '../../redux/actions/giftsActions';
+
+import { fetchGiftCardsByIds } from '../../redux/actions/giftsActions';
+import moment from 'moment';
 
 interface MailingFormProps {
   initialValues: Mailing;
@@ -34,8 +32,10 @@ const MailingForm: React.FC<MailingFormProps> = ({
   );
 
   useEffect(() => {
-    const ids = initialValues.gifts.map((gift) => gift.giftCardId);
-    dispatch(fetchGiftCardsByIds(ids));
+    if (initialValues.gifts.length) {
+      const ids = initialValues.gifts.map((gift) => gift.giftCardId);
+      dispatch(fetchGiftCardsByIds(ids));
+    }
   }, [dispatch, initialValues]);
 
   useEffect(() => {
@@ -103,6 +103,7 @@ const MailingForm: React.FC<MailingFormProps> = ({
         helperText={formik.touched.name && formik.errors.name}
         fullWidth
         margin='normal'
+        size='small'
       />
       <Autocomplete
         multiple
@@ -139,6 +140,24 @@ const MailingForm: React.FC<MailingFormProps> = ({
         )}
       />
       <TextField
+        label='Дата рассылки'
+        type='date'
+        name='mailingDate'
+        value={moment(formik.values.mailingDate).format('YYYY-MM-DD')}
+        onChange={formik.handleChange}
+        InputLabelProps={{
+          shrink: true,
+        }}
+        error={formik.touched.mailingDate && Boolean(formik.errors.mailingDate)}
+        helperText={formik.touched.mailingDate && formik.errors.mailingDate}
+        fullWidth
+        margin='normal'
+        InputProps={{
+          inputProps: { min: moment().format('DD-MM-YYYY') },
+        }}
+        size='small'
+      />
+      <TextField
         label='Кол-во дней на взятие подарка'
         name='daysToClaim'
         type='number'
@@ -148,6 +167,7 @@ const MailingForm: React.FC<MailingFormProps> = ({
         helperText={formik.touched.daysToClaim && formik.errors.daysToClaim}
         fullWidth
         margin='normal'
+        size='small'
       />
       <TextField
         label='Кол-во дней на получение подарка'
@@ -161,6 +181,7 @@ const MailingForm: React.FC<MailingFormProps> = ({
         helperText={formik.touched.daysToReceive && formik.errors.daysToReceive}
         fullWidth
         margin='normal'
+        size='small'
       />
       <TextField
         label='Описание акции'
@@ -184,8 +205,8 @@ const MailingForm: React.FC<MailingFormProps> = ({
         helperText={formik.touched.cardNumbers && formik.errors.cardNumbers}
         fullWidth
         margin='normal'
+        size='small'
       />
-
       <Button type='submit' color='primary'>
         Сохранить
       </Button>

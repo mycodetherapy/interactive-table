@@ -58,7 +58,7 @@ const MailingsTable: React.FC = () => {
       daysToReceive: 0,
       description: '',
       cardNumbers: '',
-      date: moment(new Date()).format('DD-MM-YYYY'),
+      mailingDate: moment(new Date()).format('YYYY-MM-DD'),
     };
     setEditingMailing(newMailing);
     handleShowForm();
@@ -167,7 +167,9 @@ const MailingsTable: React.FC = () => {
           {mailings.map((mailing) => (
             <TableRow key={mailing.id}>
               <TableCell>{mailing.name}</TableCell>
-              <TableCell>{mailing.date}</TableCell>
+              <TableCell>
+                {moment(mailing.mailingDate).format('DD.MM.YYYY')}
+              </TableCell>
               <TableCell>{totalRemainingQuantity(mailing.gifts)}</TableCell>
               <TableCell>
                 <Button

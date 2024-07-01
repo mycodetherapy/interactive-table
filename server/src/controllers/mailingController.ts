@@ -9,7 +9,7 @@ export const getMailings = async (req: Request, res: Response) => {
 
   try {
     const [mailings] = await pool.query<Mailing & RowDataPacket[]>(
-      'SELECT * FROM mailings LIMIT ? OFFSET ?',
+      'SELECT * FROM mailings ORDER BY mailingDate DESC LIMIT ? OFFSET ?',
       [Number(limit), offset]
     );
 
@@ -37,7 +37,7 @@ export const addMailing = async (req: Request, res: Response) => {
   const {
     name,
     gifts,
-    date,
+    mailingDate,
     daysToClaim,
     daysToReceive,
     description,
@@ -46,8 +46,8 @@ export const addMailing = async (req: Request, res: Response) => {
 
   try {
     const [result] = await pool.query(
-      'INSERT INTO mailings (name, date, daysToClaim, daysToReceive, description, cardNumbers) VALUES (?, ?, ?, ?, ?, ?)',
-      [name, date, daysToClaim, daysToReceive, description, cardNumbers]
+      'INSERT INTO mailings (name,  mailingDate, daysToClaim, daysToReceive, description, cardNumbers) VALUES (?, ?, ?, ?, ?, ?)',
+      [name, mailingDate, daysToClaim, daysToReceive, description, cardNumbers]
     );
     const mailingId = (result as any).insertId;
 
@@ -71,7 +71,7 @@ export const updateMailing = async (req: Request, res: Response) => {
   const {
     name,
     gifts,
-    date,
+    mailingDate,
     daysToClaim,
     daysToReceive,
     description,
@@ -80,8 +80,16 @@ export const updateMailing = async (req: Request, res: Response) => {
 
   try {
     await pool.query(
-      'UPDATE mailings SET name = ?, date = ?, daysToClaim = ?, daysToReceive = ?, description = ?, cardNumbers = ? WHERE id = ?',
-      [name, date, daysToClaim, daysToReceive, description, cardNumbers, id]
+      'UPDATE mailings SET name = ?, mailingDate = ?, daysToClaim = ?, daysToReceive = ?, description = ?, cardNumbers = ? WHERE id = ?',
+      [
+        name,
+        mailingDate,
+        daysToClaim,
+        daysToReceive,
+        description,
+        cardNumbers,
+        id,
+      ]
     );
 
     const deleteResult = await pool.query(

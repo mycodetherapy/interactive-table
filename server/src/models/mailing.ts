@@ -4,7 +4,7 @@ export type Mailing = {
   id: number;
   name: string;
   giftCards: MailingGift[];
-  date: string;
+  mailingDate: string;
   daysToClaim: number;
   daysToReceive: number;
   description: string;
