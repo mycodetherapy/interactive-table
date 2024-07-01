@@ -4,12 +4,14 @@ import { Mailing } from '../types';
 interface MailingState {
   mailings: Mailing[];
   currentPage: number;
+  totalMailings: number;
   error: string | null;
 }
 
 const initialState: MailingState = {
   mailings: [],
   currentPage: 1,
+  totalMailings: 0,
   error: null,
 };
 
@@ -20,9 +22,12 @@ const FETCH_MAILINGS_SUCCESS = 'mailings/fetchMailingsSuccess';
 const FETCH_MAILINGS_FAILURE = 'mailings/fetchMailingsFailure';
 const SET_CURRENT_PAGE = 'mailing/setCurrentPage';
 
-export const fetchMailingsSuccess = (mailings: Mailing[]) => ({
+export const fetchMailingsSuccess = (
+  mailings: Mailing[],
+  totalMailings: number
+) => ({
   type: FETCH_MAILINGS_SUCCESS,
-  payload: mailings,
+  payload: { mailings, totalMailings },
 });
 
 export const fetchMailingsFailure = (error: string) => ({
@@ -58,7 +63,8 @@ const mailingsSliceReducer = (
     case FETCH_MAILINGS_SUCCESS:
       return {
         ...state,
-        mailings: action.payload,
+        mailings: action.payload.mailings,
+        totalMailings: action.payload.totalMailings,
         //loading: false,
         //error: null,
       };
@@ -71,7 +77,7 @@ const mailingsSliceReducer = (
     case ADD_MAILING:
       return {
         ...state,
-        mailings: [...state.mailings, action.payload],
+        mailings: [action.payload, ...state.mailings],
       };
     case REMOVE_MAILING:
       return {

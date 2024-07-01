@@ -17,11 +17,16 @@ import {
 import { Mailing } from '../../types';
 
 export const fetchMailings =
-  (page: number): ThunkAction<void, RootState, unknown, AnyAction> =>
+  (
+    page: number,
+    limit: number
+  ): ThunkAction<void, RootState, unknown, AnyAction> =>
   async (dispatch) => {
     try {
-      const response = await getMailings(page);
-      dispatch(fetchMailingsSuccess(response));
+      const response = await getMailings(page, limit);
+      dispatch(
+        fetchMailingsSuccess(response?.mailings, response?.totalMailings)
+      );
     } catch (error) {
       if (error instanceof Error) dispatch(fetchMailingsFailure(error.message));
     }

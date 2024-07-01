@@ -1,9 +1,11 @@
 import { apiClient } from '../constants';
 import { Mailing } from '../types';
 
-export const getMailings = async (page: number) => {
+export const getMailings = async (page: number, limit: number) => {
   try {
-    const response = await apiClient.get(`/mailings?page=${page}`);
+    const response = await apiClient.get(
+      `/mailings?page=${page}&limit=${limit}`
+    );
     return response.data;
   } catch (error) {
     console.error('Error fetching mailings:', error);

@@ -4,14 +4,13 @@ import { Mailing, MailingGift } from '../models/mailing';
 import { RowDataPacket } from 'mysql2';
 
 export const getMailings = async (req: Request, res: Response) => {
-  const { page = 1 } = req.query;
-  const limit = 20;
-  const offset = (Number(page) - 1) * limit;
+  const { page = 1, limit = 20 } = req.query;
+  const offset = (Number(page) - 1) * Number(limit);
 
   try {
     const [mailings] = await pool.query<Mailing & RowDataPacket[]>(
       'SELECT * FROM mailings LIMIT ? OFFSET ?',
-      [limit, offset]
+      [Number(limit), offset]
     );
 
     for (const mailing of mailings) {
@@ -22,7 +21,11 @@ export const getMailings = async (req: Request, res: Response) => {
       mailing.gifts = gifts;
     }
 
-    res.json(mailings);
+    const [totalMailings] = await pool.query<
+      { count: number }[] & RowDataPacket[]
+    >('SELECT COUNT(*) AS count FROM mailings');
+
+    res.json({ mailings, totalMailings: totalMailings[0].count });
   } catch (error) {
     if (error instanceof Error) {
       res.status(500).json({ message: error.message });

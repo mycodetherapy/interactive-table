@@ -12,6 +12,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  Pagination,
 } from '@mui/material';
 import MailingForm from '../MailingForm/MailingForm';
 import { ConfirmationModal } from '../Modals/ConfirmationModal';
@@ -25,11 +26,16 @@ import {
 } from '../../redux/actions/mailingsActions';
 import { getGiftCardsByIdsApi } from '../../api/apiGiftCards';
 import { saveGiftCards } from '../../redux/actions/giftsActions';
+import { setCurrentPage } from '../../redux/mailingsSlice';
+import { LIMIT_ROWS } from '../../constants';
 
 const MailingsTable: React.FC = () => {
   const mailings = useSelector((state: RootState) => state.mailings.mailings);
   const currentPage = useSelector(
     (state: RootState) => state.mailings.currentPage
+  );
+  const totalPages = useSelector(
+    (state: RootState) => state.mailings.totalMailings
   );
   const dispatch = useDispatch();
   const [editingMailing, setEditingMailing] = useState<Mailing | null>(null);
@@ -37,8 +43,8 @@ const MailingsTable: React.FC = () => {
   const [formOpen, setFormOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    dispatch(fetchMailings(currentPage));
-  }, [dispatch]);
+    dispatch(fetchMailings(currentPage, LIMIT_ROWS));
+  }, [dispatch, currentPage]);
 
   const isExistMailing = (currentId: number) =>
     !!mailings?.find((mailing) => mailing.id === currentId);
@@ -129,8 +135,21 @@ const MailingsTable: React.FC = () => {
     return gifts.reduce((total, gifts) => total + gifts.quantity, 0);
   };
 
+  const handleChangePage = (event: unknown, newPage: number) => {
+    dispatch(setCurrentPage(newPage));
+    dispatch(fetchMailings(newPage, LIMIT_ROWS));
+  };
+
   return (
-    <TableContainer>
+    <TableContainer
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        minHeight: '90vh',
+        flexGrow: 1,
+      }}
+    >
       <Button variant='contained' color='primary' onClick={handleCreate}>
         Добавить рассылку
       </Button>
@@ -169,6 +188,13 @@ const MailingsTable: React.FC = () => {
           ))}
         </TableBody>
       </Table>
+      <Pagination
+        count={Math.ceil(totalPages / LIMIT_ROWS)}
+        page={currentPage}
+        onChange={handleChangePage}
+        color='primary'
+        sx={{ marginTop: 'auto' }}
+      />
       <Dialog open={formOpen} onClose={() => setEditingMailing(null)}>
         <DialogTitle>Редактировать рассылку</DialogTitle>
         <DialogContent>
