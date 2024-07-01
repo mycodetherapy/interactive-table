@@ -15,6 +15,26 @@ export const getGiftCards = async (req: Request, res: Response) => {
   }
 };
 
+export const getGiftCardsByIds = async (req: Request, res: Response) => {
+  const { ids } = req.query;
+
+  if (!ids || !Array.isArray(ids)) {
+    return res.status(400).json({ message: 'Invalid or missing IDs' });
+  }
+
+  try {
+    const placeholders = ids.map(() => '?').join(',');
+    const query = `SELECT * FROM gift_cards WHERE id IN (${placeholders})`;
+    const [results] = await pool.query<GiftCard & RowDataPacket[]>(query, ids);
+
+    res.json(results);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+};
+
 export const updateGiftCards = async (req: Request, res: Response) => {
   const updates: { id: number; remainingQuantity: number }[] = req.body;
 

@@ -1,11 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../redux/store';
-import {
-  removeMailing,
-  updateMailing,
-  addMailing,
-} from '../../redux/mailingsSlice';
 import {
   Table,
   TableBody,
@@ -20,19 +15,33 @@ import {
 } from '@mui/material';
 import MailingForm from '../MailingForm/MailingForm';
 import { ConfirmationModal } from '../Modals/ConfirmationModal';
-import { Mailing, MailingGift, RestockGift } from '../../types';
-import { restockGiftCards } from '../../redux/giftCardSlice';
+import { GiftCard, Mailing, MailingGift } from '../../types';
 import moment from 'moment';
+import {
+  createMailing,
+  fetchMailings,
+  modifyMailing,
+  removeMailingById,
+} from '../../redux/actions/mailingsActions';
+import { getGiftCardsByIdsApi } from '../../api/apiGiftCards';
+import { saveGiftCards } from '../../redux/actions/giftsActions';
 
 const MailingsTable: React.FC = () => {
   const mailings = useSelector((state: RootState) => state.mailings.mailings);
+  const currentPage = useSelector(
+    (state: RootState) => state.mailings.currentPage
+  );
   const dispatch = useDispatch();
   const [editingMailing, setEditingMailing] = useState<Mailing | null>(null);
   const [confirmMoalOpen, setConfirmMoalOpen] = useState<boolean>(false);
   const [formOpen, setFormOpen] = useState<boolean>(false);
 
+  useEffect(() => {
+    dispatch(fetchMailings(currentPage));
+  }, [dispatch]);
+
   const isExistMailing = (currentId: number) =>
-    !!mailings.find((mailing) => mailing.id === currentId);
+    !!mailings?.find((mailing) => mailing.id === currentId);
 
   const handleCreate = () => {
     const newMailing: Mailing = {
@@ -43,7 +52,7 @@ const MailingsTable: React.FC = () => {
       daysToReceive: 0,
       description: '',
       cardNumbers: '',
-      date: new Date(),
+      date: moment(new Date()).format('DD-MM-YYYY'),
     };
     setEditingMailing(newMailing);
     handleShowForm();
@@ -53,17 +62,20 @@ const MailingsTable: React.FC = () => {
     setEditingMailing(newMailing);
     handleShowForm();
   };
-  const handleConfirmation = (newMailing: Mailing) => {
-    setEditingMailing(newMailing);
-    handleShowConfirmation();
+
+  const handleConfirmation = (changedValues: Mailing) => {
+    if (editingMailing) {
+      setEditingMailing(changedValues);
+      handleShowConfirmation();
+    }
   };
 
   const handleSave = () => {
     if (editingMailing) {
       const isExist = isExistMailing(editingMailing.id);
       isExist
-        ? dispatch(updateMailing(editingMailing))
-        : dispatch(addMailing(editingMailing));
+        ? dispatch(modifyMailing(editingMailing))
+        : dispatch(createMailing(editingMailing));
       handleShowConfirmation();
       handleShowForm();
     }
@@ -90,12 +102,27 @@ const MailingsTable: React.FC = () => {
     setFormOpen(!formOpen);
   };
 
-  const handleRemoveMailing = (
+  const handleRemoveMailing = async (
     mailingId: number,
-    restockGifts: RestockGift[]
+    restockGifts: MailingGift[]
   ) => {
-    dispatch(removeMailing(mailingId));
-    dispatch(restockGiftCards(restockGifts));
+    const giftsForChange = await getGiftCardsByIdsApi(
+      restockGifts.map((gift) => gift.giftCardId)
+    );
+
+    const updates = restockGifts.map((restockGift) => {
+      const giftCard = giftsForChange.find(
+        (gift: GiftCard) => gift.id === restockGift.giftCardId
+      );
+      return {
+        id: restockGift.giftCardId,
+        remainingQuantity:
+          (giftCard?.remainingQuantity ?? 0) + restockGift.quantity,
+      };
+    });
+
+    dispatch(saveGiftCards(updates));
+    dispatch(removeMailingById(mailingId));
   };
 
   const totalRemainingQuantity = (gifts: MailingGift[]): number => {
@@ -121,19 +148,13 @@ const MailingsTable: React.FC = () => {
           {mailings.map((mailing) => (
             <TableRow key={mailing.id}>
               <TableCell>{mailing.name}</TableCell>
-              <TableCell>{moment(mailing.date).format('DD.MM.YYYY')}</TableCell>
+              <TableCell>{mailing.date}</TableCell>
               <TableCell>{totalRemainingQuantity(mailing.gifts)}</TableCell>
               <TableCell>
                 <Button
                   color='secondary'
                   onClick={() => {
-                    const restockGifts: RestockGift[] = mailing.gifts.map(
-                      (card: MailingGift) => ({
-                        id: card.giftCardId,
-                        quantity: card.quantity,
-                      })
-                    );
-                    handleRemoveMailing(mailing.id, restockGifts);
+                    handleRemoveMailing(mailing.id, mailing.gifts);
                   }}
                 >
                   Удалить

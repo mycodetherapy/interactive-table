@@ -10,9 +10,14 @@ import GiftCardDialog from '../GiftCardDialog/GiftCardDialog';
 import { GiftCard, Mailing, MailingGift } from '../../types';
 import { validationMailingFormSchema as validationSchema } from '../../validation/validationMailingForm';
 import { RootState } from '../../redux/store';
+import {
+  fetchGiftCards,
+  fetchGiftCardsByIds,
+  saveGiftCards,
+} from '../../redux/actions/giftsActions';
 
 interface MailingFormProps {
-  initialValues: any;
+  initialValues: Mailing;
   onSubmit: (values: Mailing) => void;
   onClose: () => void;
 }
@@ -24,17 +29,14 @@ const MailingForm: React.FC<MailingFormProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
-  const giftCards = useSelector(
-    (state: RootState) => state.giftCards.giftCards
+  const currentGiftCards = useSelector(
+    (state: RootState) => state.giftCards.currentGiftCards
   );
 
-  const giftCardMap = useMemo(() => {
-    const map: Record<number, GiftCard> = {};
-    giftCards.forEach((card) => {
-      map[card.id] = card;
-    });
-    return map;
-  }, [giftCards]);
+  useEffect(() => {
+    const ids = initialValues.gifts.map((gift) => gift.giftCardId);
+    dispatch(fetchGiftCardsByIds(ids));
+  }, [dispatch, initialValues]);
 
   useEffect(() => {
     return () => onClose();
@@ -110,11 +112,13 @@ const MailingForm: React.FC<MailingFormProps> = ({
         value={formik.values.gifts}
         renderTags={(value: MailingGift[]) =>
           value.map((option: MailingGift, index: number) => {
-            const giftCard = giftCardMap[option.giftCardId];
+            const giftCard = currentGiftCards.find(
+              (gift) => (gift.id = option.giftCardId)
+            );
             return (
               <Chip
                 key={option.giftCardId}
-                label={`${giftCard.name} (${option.quantity})`}
+                label={`${giftCard?.name} (${option.quantity})`}
                 onDelete={() => handleGiftCardRemove(option.giftCardId)}
                 color='primary'
                 style={{ margin: 4 }}

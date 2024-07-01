@@ -1,5 +1,5 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Dialog,
   DialogTitle,
@@ -17,6 +17,10 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import { GiftCard, MailingGift } from '../../types';
 import { RootState } from '../../redux/store';
 import moment from 'moment';
+import {
+  fetchGiftCards,
+  saveGiftCards,
+} from '../../redux/actions/giftsActions';
 
 interface GiftCardDialogProps {
   open: boolean;
@@ -33,9 +37,29 @@ const GiftCardDialog: React.FC<GiftCardDialogProps> = ({
   onSelect,
   onRemove,
 }) => {
+  const dispatch = useDispatch();
+
   const giftCards = useSelector(
     (state: RootState) => state.giftCards.giftCards
   );
+
+  useEffect(() => {
+    if (open) {
+      dispatch(fetchGiftCards());
+    }
+  }, [open, dispatch]);
+
+  const handleSave = () => {
+    const updates = selectedGiftCards.map((selectedCard) => ({
+      id: selectedCard.giftCardId,
+      remainingQuantity:
+        giftCards.find((card) => card.id === selectedCard.giftCardId)
+          ?.remainingQuantity ?? 0 - selectedCard.quantity,
+    }));
+
+    dispatch(saveGiftCards(updates));
+    onClose();
+  };
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -106,7 +130,7 @@ const GiftCardDialog: React.FC<GiftCardDialogProps> = ({
         <Button onClick={onClose} color='primary'>
           Отмена
         </Button>
-        <Button onClick={onClose} color='primary'>
+        <Button onClick={handleSave} color='primary'>
           Добавить
         </Button>
       </DialogActions>

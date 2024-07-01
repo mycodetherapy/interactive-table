@@ -1,60 +1,24 @@
 import { AnyAction } from 'redux';
-import { GiftCard, RestockGift } from '../types';
+import { GiftCard } from '../types';
 
 interface GiftCardsState {
   giftCards: GiftCard[];
+  currentGiftCards: GiftCard[];
+  error: string | null;
 }
 
 const initialState: GiftCardsState = {
-  giftCards: [
-    {
-      id: 1,
-      name: 'Gift Card 1',
-      remainingQuantity: 10,
-      expirationDate: new Date('2024-08-10'),
-      price: 100,
-    },
-    {
-      id: 2,
-      name: 'Gift Card 2',
-      remainingQuantity: 5,
-      expirationDate: new Date('2024-07-15'),
-      price: 50,
-    },
-    {
-      id: 3,
-      name: 'Gift Card 3',
-      remainingQuantity: 8,
-      expirationDate: new Date('2024-07-20'),
-      price: 75,
-    },
-    {
-      id: 4,
-      name: 'Gift Card 4',
-      remainingQuantity: 15,
-      expirationDate: new Date('2024-08-01'),
-      price: 150,
-    },
-    {
-      id: 5,
-      name: 'Gift Card 5',
-      remainingQuantity: 2,
-      expirationDate: new Date('2024-05-30'),
-      price: 25,
-    },
-    {
-      id: 6,
-      name: 'Gift Card 6',
-      remainingQuantity: 20,
-      expirationDate: new Date('2024-08-18'),
-      price: 200,
-    },
-  ],
+  giftCards: [],
+  currentGiftCards: [],
+  error: null,
 };
 
 const DECREMENT_GIFT_CARD_QUANTITY = 'giftCards/decrementGiftCardQuantity';
 const INCREMENT_GIFT_CARD_QUANTITY = 'giftCards/incrementGiftCardQuantity';
-const RESTOCK_GIFT_CARDS = 'giftCards/restockGiftCards';
+const FETCH_GIFT_CARDS_SUCCESS = 'giftCards/fetchGiftCardsSuccess';
+const UPDATE_GIFT_CARDS_SUCCESS = 'giftCards/updateGiftCardsSuccess';
+const GIFT_CARDS_FAILURE = 'giftCards/giftCardsFailure';
+const CURRENT_GIFT_CARDS = 'giftCards/fetchCurrentGiftCards';
 
 export const decrementGiftCardQuantity = (id: number) => ({
   type: DECREMENT_GIFT_CARD_QUANTITY,
@@ -66,9 +30,24 @@ export const incrementGiftCardQuantity = (id: number) => ({
   payload: id,
 });
 
-export const restockGiftCards = (restockItems: RestockGift[]) => ({
-  type: RESTOCK_GIFT_CARDS,
-  payload: restockItems,
+export const fetchGiftCardsSuccess = (giftCards: GiftCard[]) => ({
+  type: FETCH_GIFT_CARDS_SUCCESS,
+  payload: giftCards,
+});
+
+export const fetchCurrentGiftCards = (currentGiftCards: GiftCard[]) => ({
+  type: FETCH_GIFT_CARDS_SUCCESS,
+  payload: currentGiftCards,
+});
+
+export const updateGiftCardsSuccess = (giftCards: GiftCard[]) => ({
+  type: UPDATE_GIFT_CARDS_SUCCESS,
+  payload: giftCards,
+});
+
+export const giftCardsFailure = (error: string) => ({
+  type: GIFT_CARDS_FAILURE,
+  payload: error,
 });
 
 const giftCardsSliceReducer = (
@@ -94,21 +73,29 @@ const giftCardsSliceReducer = (
             : giftCard
         ),
       };
-    case RESTOCK_GIFT_CARDS:
+    case FETCH_GIFT_CARDS_SUCCESS:
       return {
         ...state,
-        giftCards: state.giftCards.map((giftCard) => {
-          const restockGift = action.payload.find(
-            (item: GiftCard) => item.id === giftCard.id
-          );
-          return restockGift
-            ? {
-                ...giftCard,
-                remainingQuantity:
-                  giftCard.remainingQuantity + restockGift.quantity,
-              }
-            : giftCard;
-        }),
+        giftCards: action.payload,
+        error: null,
+      };
+    case FETCH_GIFT_CARDS_SUCCESS:
+      return {
+        ...state,
+        giftCards: action.payload,
+        error: null,
+      };
+
+    case CURRENT_GIFT_CARDS:
+      return {
+        ...state,
+        currentGiftCards: action.payload,
+        error: null,
+      };
+    case GIFT_CARDS_FAILURE:
+      return {
+        ...state,
+        error: action.payload,
       };
     default:
       return state;
