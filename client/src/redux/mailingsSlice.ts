@@ -77,7 +77,7 @@ const mailingsSliceReducer = (
     case ADD_MAILING:
       return {
         ...state,
-        mailings: [action.payload, ...state.mailings],
+        mailings: [...state.mailings, action.payload],
       };
     case REMOVE_MAILING:
       return {

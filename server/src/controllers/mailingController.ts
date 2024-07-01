@@ -4,13 +4,13 @@ import { Mailing, MailingGift } from '../models/mailing';
 import { RowDataPacket } from 'mysql2';
 
 export const getMailings = async (req: Request, res: Response) => {
-  const { page = 1, limit = 20 } = req.query;
+  const { page = 1, limit = 20, search = '' } = req.query;
   const offset = (Number(page) - 1) * Number(limit);
 
   try {
     const [mailings] = await pool.query<Mailing & RowDataPacket[]>(
-      'SELECT * FROM mailings ORDER BY mailingDate DESC LIMIT ? OFFSET ?',
-      [Number(limit), offset]
+      `SELECT * FROM mailings WHERE name LIKE ? ORDER BY mailingDate DESC LIMIT ? OFFSET ?`,
+      [`%${search}%`, Number(limit), offset]
     );
 
     for (const mailing of mailings) {
@@ -23,7 +23,9 @@ export const getMailings = async (req: Request, res: Response) => {
 
     const [totalMailings] = await pool.query<
       { count: number }[] & RowDataPacket[]
-    >('SELECT COUNT(*) AS count FROM mailings');
+    >(`SELECT COUNT(*) AS count FROM mailings WHERE name LIKE ?`, [
+      `%${search}%`,
+    ]);
 
     res.json({ mailings, totalMailings: totalMailings[0].count });
   } catch (error) {

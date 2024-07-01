@@ -13,6 +13,8 @@ import {
   DialogContent,
   DialogTitle,
   Pagination,
+  TextField,
+  Box,
 } from '@mui/material';
 import MailingForm from '../MailingForm/MailingForm';
 import { ConfirmationModal } from '../Modals/ConfirmationModal';
@@ -41,10 +43,20 @@ const MailingsTable: React.FC = () => {
   const [editingMailing, setEditingMailing] = useState<Mailing | null>(null);
   const [confirmMoalOpen, setConfirmMoalOpen] = useState<boolean>(false);
   const [formOpen, setFormOpen] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
   useEffect(() => {
-    dispatch(fetchMailings(currentPage, LIMIT_ROWS));
-  }, [dispatch, currentPage]);
+    dispatch(fetchMailings(currentPage, LIMIT_ROWS, debouncedSearchTerm));
+  }, [dispatch, currentPage, debouncedSearchTerm]);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm.trim() !== '' ? searchTerm : '');
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
 
   const isExistMailing = (currentId: number) =>
     !!mailings?.find((mailing) => mailing.id === currentId);
@@ -148,12 +160,33 @@ const MailingsTable: React.FC = () => {
         alignItems: 'center',
         minHeight: '90vh',
         flexGrow: 1,
+        gap: 2,
       }}
     >
-      <Button variant='contained' color='primary' onClick={handleCreate}>
-        Добавить рассылку
-      </Button>
-      <Table>
+      <Box
+        sx={{
+          display: 'flex',
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <TextField
+          label='Поиск по названию рассылки'
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          variant='outlined'
+          fullWidth
+          margin='normal'
+          size='small'
+          sx={{ maxWidth: '300px', margin: 0 }}
+        />
+        <Button variant='contained' color='primary' onClick={handleCreate}>
+          Добавить рассылку
+        </Button>
+      </Box>
+
+      <Table sx={{ borderTop: '1px solid' }}>
         <TableHead>
           <TableRow>
             <TableCell>Название рассылки</TableCell>

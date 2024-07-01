@@ -19,16 +19,19 @@ import { Mailing } from '../../types';
 export const fetchMailings =
   (
     page: number,
-    limit: number
+    limit: number,
+    search?: string
   ): ThunkAction<void, RootState, unknown, AnyAction> =>
   async (dispatch) => {
     try {
-      const response = await getMailings(page, limit);
+      const response = await getMailings(page, limit, search);
       dispatch(
         fetchMailingsSuccess(response?.mailings, response?.totalMailings)
       );
     } catch (error) {
-      if (error instanceof Error) dispatch(fetchMailingsFailure(error.message));
+      if (error instanceof Error) {
+        dispatch(fetchMailingsFailure(error.message));
+      }
     }
   };
 
