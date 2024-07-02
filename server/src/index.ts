@@ -4,14 +4,15 @@ import cors from 'cors';
 import mailingRoutes from './routes/mailingRoutes';
 import giftCardRoutes from './routes/giftCardRoutes';
 import mysql from 'mysql2/promise';
-import pool from './config/db';
+import pool, { baseConfig } from './config/db';
 
 const createDatabaseAndTables = async () => {
-  const connection = await mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'newpassword',
-  });
+  const connectionData = {
+    host: baseConfig.host,
+    user: baseConfig.user,
+    password: baseConfig.password,
+  };
+  const connection = await mysql.createConnection(connectionData);
 
   try {
     await connection.query('CREATE DATABASE IF NOT EXISTS mailing_app');
