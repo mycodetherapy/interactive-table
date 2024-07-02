@@ -46,6 +46,8 @@ const MailingsTable: React.FC = () => {
   const [formOpen, setFormOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const isExistMailing = (currentId: number) =>
+    !!mailings?.find((mailing) => mailing.id === currentId);
 
   useEffect(() => {
     dispatch(fetchMailings(currentPage, LIMIT_ROWS, debouncedSearchTerm));
@@ -58,9 +60,6 @@ const MailingsTable: React.FC = () => {
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
-
-  const isExistMailing = (currentId: number) =>
-    !!mailings?.find((mailing) => mailing.id === currentId);
 
   const handleCreate = () => {
     const newMailing: Mailing = {
@@ -100,19 +99,6 @@ const MailingsTable: React.FC = () => {
     }
   };
 
-  const confirmModalData = () => {
-    let data = { title: 'акции', acceptTitle: 'акцию' };
-    const isExist = isExistMailing(editingMailing?.id || NaN);
-    if (isExist) {
-      data.title = `Редактировние существующей ${data.title}`;
-      data.acceptTitle = `Сохранить ${data.acceptTitle}`;
-    } else {
-      data.title = `Создание новой ${data.title}`;
-      data.acceptTitle = `Создать ${data.acceptTitle}`;
-    }
-    return data;
-  };
-
   const handleShowConfirmation = () => {
     setConfirmMoalOpen(!confirmMoalOpen);
   };
@@ -144,13 +130,28 @@ const MailingsTable: React.FC = () => {
     dispatch(removeMailingById(mailingId));
   };
 
+  const handleChangePage = (event: unknown, newPage: number) => {
+    dispatch(setCurrentPage(newPage));
+    dispatch(fetchMailings(newPage, LIMIT_ROWS));
+  };
+
   const totalRemainingQuantity = (gifts: MailingGift[]): number => {
     return gifts.reduce((total, gifts) => total + gifts.quantity, 0);
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    dispatch(setCurrentPage(newPage));
-    dispatch(fetchMailings(newPage, LIMIT_ROWS));
+  const confirmModalData = () => {
+    let data = { title: '', acceptTitle: '', content: '' };
+    const isExist = isExistMailing(editingMailing?.id || NaN);
+    if (isExist) {
+      data.title = `Редактировние акции`;
+      data.acceptTitle = `Сохранить акцию`;
+      data.content = `Акция будет сохранена. Сохранить акцию?`;
+    } else {
+      data.title = `Создание новой новой акции`;
+      data.acceptTitle = `Создать акцию`;
+      data.content = `Будет создана новая акция. Создать акцию?`;
+    }
+    return data;
   };
 
   return (
@@ -246,6 +247,7 @@ const MailingsTable: React.FC = () => {
       <ConfirmationModal
         open={confirmMoalOpen}
         title={confirmModalData().title}
+        content={confirmModalData().content}
         acceptTitle={confirmModalData().acceptTitle}
         acceptAction={handleSave}
         cancelAction={handleShowConfirmation}
