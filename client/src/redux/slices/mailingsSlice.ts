@@ -78,8 +78,6 @@ const mailingsSliceReducer = (
           ...state.pages,
           [action.payload.page]: action.payload.mailings,
         },
-        //loading: false,
-        //error: null,
       };
     case FETCH_MAILINGS_FAILURE:
       return {

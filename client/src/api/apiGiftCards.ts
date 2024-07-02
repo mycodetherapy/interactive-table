@@ -6,6 +6,7 @@ export const getGiftCardsApi = async () => {
     return response.data;
   } catch (error) {
     console.error('Error fetching gift cards:', error);
+    throw error;
   }
 };
 
@@ -29,5 +30,6 @@ export const updateGiftCardsApi = async (
     return response.data;
   } catch (error) {
     console.error('Error updating gift cards:', error);
+    throw error;
   }
 };

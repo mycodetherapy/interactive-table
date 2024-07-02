@@ -92,6 +92,15 @@ const MailingForm: React.FC<MailingFormProps> = ({
     setIsGiftDialogOpen(!isGiftDialogOpen);
   };
 
+  useEffect(() => {
+    if (formik.values.mailingDate) {
+      formik.setFieldValue(
+        'mailingDate',
+        moment(formik.values.mailingDate).format('YYYY-MM-DD')
+      );
+    }
+  }, [formik.values.mailingDate]);
+
   return (
     <form onSubmit={formik.handleSubmit}>
       <TextField
@@ -153,7 +162,7 @@ const MailingForm: React.FC<MailingFormProps> = ({
         fullWidth
         margin='normal'
         InputProps={{
-          inputProps: { min: moment().format('DD-MM-YYYY') },
+          inputProps: { min: moment().format('YYYY-MM-DD') },
         }}
         size='small'
       />
