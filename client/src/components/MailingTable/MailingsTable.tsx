@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import styles from './MailingsTable.module.css';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../redux/store';
 import {
@@ -155,24 +156,8 @@ const MailingsTable: React.FC = () => {
   };
 
   return (
-    <TableContainer
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        minHeight: '90vh',
-        flexGrow: 1,
-        gap: 2,
-      }}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          width: '100%',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
+    <TableContainer className={styles.container}>
+      <Box className={styles.header}>
         <TextField
           label='Поиск по названию рассылки'
           value={searchTerm}
@@ -181,14 +166,14 @@ const MailingsTable: React.FC = () => {
           fullWidth
           margin='normal'
           size='small'
-          sx={{ maxWidth: '300px', margin: 0 }}
+          className={styles.searchInput}
         />
         <Button variant='contained' color='primary' onClick={handleCreate}>
           Добавить рассылку
         </Button>
       </Box>
 
-      <Table sx={{ borderTop: '1px solid' }}>
+      <Table className={styles.table}>
         <TableHead>
           <TableRow>
             <TableCell>Название рассылки</TableCell>
