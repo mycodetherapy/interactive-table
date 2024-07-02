@@ -29,7 +29,7 @@ import {
 } from '../../redux/actions/mailingsActions';
 import { getGiftCardsByIdsApi } from '../../api/apiGiftCards';
 import { saveGiftCards } from '../../redux/actions/giftsActions';
-import { setCurrentPage } from '../../redux/mailingsSlice';
+import { setCurrentPage } from '../../redux/slices/mailingsSlice';
 import { LIMIT_ROWS } from '../../constants';
 import ErrorSnackbar from '../SnackBars/ErrorSnackbar';
 

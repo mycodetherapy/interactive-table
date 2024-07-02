@@ -1,6 +1,6 @@
 import { AnyAction } from 'redux';
-import { Mailing } from '../types';
-import { CLEAR_ERRORS } from './actions/errorActions';
+import { Mailing } from '../../types';
+import { CLEAR_ERRORS } from '../actions/errorActions';
 
 interface MailingState {
   mailings: Mailing[];

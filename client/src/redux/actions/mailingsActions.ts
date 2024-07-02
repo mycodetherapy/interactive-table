@@ -13,7 +13,7 @@ import {
   fetchMailingsSuccess,
   removeMailing,
   updateMailing,
-} from '../mailingsSlice';
+} from '../slices/mailingsSlice';
 import { Mailing } from '../../types';
 
 export const fetchMailings =

@@ -10,7 +10,7 @@ import {
   fetchCurrentGiftCards,
   fetchGiftCardsSuccess,
   giftCardsFailure,
-} from '../giftCardSlice';
+} from '../slices/giftCardSlice';
 
 export const fetchGiftCards =
   (): ThunkAction<void, RootState, unknown, AnyAction> => async (dispatch) => {

@@ -1,6 +1,6 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux';
-import mailingsReducer from './mailingsSlice';
-import giftCardsSliceReducer from './giftCardSlice';
+import mailingsReducer from './slices/mailingsSlice';
+import giftCardsSliceReducer from './slices/giftCardSlice';
 import { thunk } from 'redux-thunk';
 
 const rootReducer = combineReducers({

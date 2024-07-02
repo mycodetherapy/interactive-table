@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   decrementGiftCardQuantity,
   incrementGiftCardQuantity,
-} from '../../redux/giftCardSlice';
+} from '../../redux/slices/giftCardSlice';
 import GiftCardDialog from '../GiftCardDialog/GiftCardDialog';
 import { GiftCard, Mailing, MailingGift } from '../../types';
 import { validationMailingFormSchema as validationSchema } from '../../validation/validationMailingForm';

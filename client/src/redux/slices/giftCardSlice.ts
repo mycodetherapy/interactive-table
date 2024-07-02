@@ -1,6 +1,6 @@
 import { AnyAction } from 'redux';
-import { GiftCard } from '../types';
-import { CLEAR_ERRORS } from './actions/errorActions';
+import { GiftCard } from '../../types';
+import { CLEAR_ERRORS } from '../actions/errorActions';
 
 interface GiftCardsState {
   giftCards: GiftCard[];
