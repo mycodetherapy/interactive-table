@@ -7,4 +7,4 @@ export const API_CLIENT = axios.create({
   },
 });
 
-export const LIMIT_ROWS = 10;
+export const LIMIT_ROWS = 8;

@@ -5,6 +5,7 @@ interface MailingState {
   mailings: Mailing[];
   currentPage: number;
   totalMailings: number;
+  pages: { [key: number]: Mailing[] };
   error: string | null;
 }
 
@@ -13,6 +14,7 @@ const initialState: MailingState = {
   currentPage: 1,
   totalMailings: 0,
   error: null,
+  pages: {},
 };
 
 const ADD_MAILING = 'mailing/addMailing';
@@ -24,10 +26,11 @@ const SET_CURRENT_PAGE = 'mailing/setCurrentPage';
 
 export const fetchMailingsSuccess = (
   mailings: Mailing[],
-  totalMailings: number
+  totalMailings: number,
+  page: number
 ) => ({
   type: FETCH_MAILINGS_SUCCESS,
-  payload: { mailings, totalMailings },
+  payload: { mailings, totalMailings, page },
 });
 
 export const fetchMailingsFailure = (error: string) => ({
@@ -65,6 +68,10 @@ const mailingsSliceReducer = (
         ...state,
         mailings: action.payload.mailings,
         totalMailings: action.payload.totalMailings,
+        pages: {
+          ...state.pages,
+          [action.payload.page]: action.payload.mailings,
+        },
         //loading: false,
         //error: null,
       };
@@ -77,7 +84,8 @@ const mailingsSliceReducer = (
     case ADD_MAILING:
       return {
         ...state,
-        mailings: [...state.mailings, action.payload],
+        mailings: [action.payload, ...state.mailings],
+        pages: {},
       };
     case REMOVE_MAILING:
       return {
@@ -85,6 +93,7 @@ const mailingsSliceReducer = (
         mailings: state.mailings.filter(
           (mailing) => mailing.id !== action.payload
         ),
+        pages: {},
       };
     case UPDATE_MAILING:
       return {
@@ -92,6 +101,7 @@ const mailingsSliceReducer = (
         mailings: state.mailings.map((mailing) =>
           mailing.id === action.payload.id ? action.payload : mailing
         ),
+        pages: {},
       };
     case SET_CURRENT_PAGE:
       return {

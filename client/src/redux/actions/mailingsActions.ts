@@ -20,20 +20,50 @@ export const fetchMailings =
   (
     page: number,
     limit: number,
-    search?: string
+    search: string = ''
   ): ThunkAction<void, RootState, unknown, AnyAction> =>
-  async (dispatch) => {
-    try {
-      const response = await getMailings(page, limit, search);
+  async (dispatch, getState) => {
+    const state = getState();
+    const cachedPage = state.mailings.pages[page];
+    if (cachedPage && !search.trim()) {
       dispatch(
-        fetchMailingsSuccess(response?.mailings, response?.totalMailings)
+        fetchMailingsSuccess(cachedPage, state.mailings.totalMailings, page)
       );
-    } catch (error) {
-      if (error instanceof Error) {
-        dispatch(fetchMailingsFailure(error.message));
+    } else {
+      try {
+        const response = await getMailings(page, limit, search);
+        dispatch(
+          fetchMailingsSuccess(
+            response?.mailings,
+            response?.totalMailings,
+            page
+          )
+        );
+      } catch (error) {
+        if (error instanceof Error)
+          dispatch(fetchMailingsFailure(error.message));
       }
     }
   };
+
+// export const fetchMailings =
+//   (
+//     page: number,
+//     limit: number,
+//     search?: string
+//   ): ThunkAction<void, RootState, unknown, AnyAction> =>
+//   async (dispatch) => {
+//     try {
+//       const response = await getMailings(page, limit, search);
+//       dispatch(
+//         fetchMailingsSuccess(response?.mailings, response?.totalMailings)
+//       );
+//     } catch (error) {
+//       if (error instanceof Error) {
+//         dispatch(fetchMailingsFailure(error.message));
+//       }
+//     }
+//   };
 
 export const createMailing =
   (mailing: Mailing): ThunkAction<void, RootState, unknown, AnyAction> =>
