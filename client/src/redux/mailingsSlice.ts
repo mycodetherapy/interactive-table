@@ -1,5 +1,6 @@
 import { AnyAction } from 'redux';
 import { Mailing } from '../types';
+import { CLEAR_ERRORS } from './actions/errorActions';
 
 interface MailingState {
   mailings: Mailing[];
@@ -23,6 +24,7 @@ const UPDATE_MAILING = 'mailing/updateMailing';
 const FETCH_MAILINGS_SUCCESS = 'mailings/fetchMailingsSuccess';
 const FETCH_MAILINGS_FAILURE = 'mailings/fetchMailingsFailure';
 const SET_CURRENT_PAGE = 'mailing/setCurrentPage';
+const CLEAR_ERROR = 'mailing/clearError';
 
 export const fetchMailingsSuccess = (
   mailings: Mailing[],
@@ -58,6 +60,10 @@ export const setCurrentPage = (page: number) => ({
   payload: page,
 });
 
+export const clearError = () => ({
+  type: CLEAR_ERROR,
+});
+
 const mailingsSliceReducer = (
   state = initialState,
   action: AnyAction
@@ -78,8 +84,7 @@ const mailingsSliceReducer = (
     case FETCH_MAILINGS_FAILURE:
       return {
         ...state,
-        //loading: false,
-        //error: action.payload,
+        error: action.payload,
       };
     case ADD_MAILING:
       return {
@@ -107,6 +112,11 @@ const mailingsSliceReducer = (
       return {
         ...state,
         currentPage: action.payload,
+      };
+    case CLEAR_ERRORS:
+      return {
+        ...state,
+        error: null,
       };
     default:
       return state;

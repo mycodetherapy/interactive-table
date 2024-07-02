@@ -30,6 +30,7 @@ import { getGiftCardsByIdsApi } from '../../api/apiGiftCards';
 import { saveGiftCards } from '../../redux/actions/giftsActions';
 import { setCurrentPage } from '../../redux/mailingsSlice';
 import { LIMIT_ROWS } from '../../constants';
+import ErrorSnackbar from '../SnackBars/ErrorSnackbar';
 
 const MailingsTable: React.FC = () => {
   const mailings = useSelector((state: RootState) => state.mailings.mailings);
@@ -249,6 +250,7 @@ const MailingsTable: React.FC = () => {
         acceptAction={handleSave}
         cancelAction={handleShowConfirmation}
       />
+      <ErrorSnackbar />
     </TableContainer>
   );
 };

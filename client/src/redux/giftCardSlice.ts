@@ -1,5 +1,6 @@
 import { AnyAction } from 'redux';
 import { GiftCard } from '../types';
+import { CLEAR_ERRORS } from './actions/errorActions';
 
 interface GiftCardsState {
   giftCards: GiftCard[];
@@ -79,12 +80,6 @@ const giftCardsSliceReducer = (
         giftCards: action.payload,
         error: null,
       };
-    case FETCH_GIFT_CARDS_SUCCESS:
-      return {
-        ...state,
-        giftCards: action.payload,
-        error: null,
-      };
 
     case CURRENT_GIFT_CARDS:
       return {
@@ -96,6 +91,11 @@ const giftCardsSliceReducer = (
       return {
         ...state,
         error: action.payload,
+      };
+    case CLEAR_ERRORS:
+      return {
+        ...state,
+        error: null,
       };
     default:
       return state;

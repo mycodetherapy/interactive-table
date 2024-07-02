@@ -23,6 +23,7 @@ export const addMailingApi = async (mailing: Mailing) => {
     return response.data;
   } catch (error) {
     console.error('Error adding mailing:', error);
+    throw error;
   }
 };
 
@@ -32,6 +33,7 @@ export const updateMailingApi = async (mailing: Partial<Mailing>) => {
     return response;
   } catch (error) {
     console.error('Error updating mailing:', error);
+    throw error;
   }
 };
 
@@ -41,5 +43,6 @@ export const deleteMailingApi = async (id: number) => {
     return response.data;
   } catch (error) {
     console.error('Error deleting mailing:', error);
+    throw error;
   }
 };

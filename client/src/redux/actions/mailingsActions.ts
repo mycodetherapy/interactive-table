@@ -46,25 +46,6 @@ export const fetchMailings =
     }
   };
 
-// export const fetchMailings =
-//   (
-//     page: number,
-//     limit: number,
-//     search?: string
-//   ): ThunkAction<void, RootState, unknown, AnyAction> =>
-//   async (dispatch) => {
-//     try {
-//       const response = await getMailings(page, limit, search);
-//       dispatch(
-//         fetchMailingsSuccess(response?.mailings, response?.totalMailings)
-//       );
-//     } catch (error) {
-//       if (error instanceof Error) {
-//         dispatch(fetchMailingsFailure(error.message));
-//       }
-//     }
-//   };
-
 export const createMailing =
   (mailing: Mailing): ThunkAction<void, RootState, unknown, AnyAction> =>
   async (dispatch) => {
