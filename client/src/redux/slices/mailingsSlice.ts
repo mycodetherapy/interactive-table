@@ -22,7 +22,7 @@ const ADD_MAILING = 'mailing/addMailing';
 const REMOVE_MAILING = 'mailing/removeMailing';
 const UPDATE_MAILING = 'mailing/updateMailing';
 const FETCH_MAILINGS_SUCCESS = 'mailings/fetchMailingsSuccess';
-const FETCH_MAILINGS_FAILURE = 'mailings/fetchMailingsFailure';
+const FETCH_MAILINGS_FAILURE = 'mailings/mailingsFailure';
 const SET_CURRENT_PAGE = 'mailing/setCurrentPage';
 const CLEAR_ERROR = 'mailing/clearError';
 
@@ -35,7 +35,7 @@ export const fetchMailingsSuccess = (
   payload: { mailings, totalMailings, page },
 });
 
-export const fetchMailingsFailure = (error: string) => ({
+export const mailingsFailure = (error: string) => ({
   type: FETCH_MAILINGS_FAILURE,
   payload: error,
 });

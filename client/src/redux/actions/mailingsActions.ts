@@ -9,7 +9,7 @@ import {
 } from '../../api/apiMailings';
 import {
   addMailing,
-  fetchMailingsFailure,
+  mailingsFailure,
   fetchMailingsSuccess,
   removeMailing,
   updateMailing,
@@ -21,7 +21,7 @@ export const fetchMailings =
     page: number,
     limit: number,
     search: string = ''
-  ): ThunkAction<void, RootState, unknown, AnyAction> =>
+  ): ThunkAction<Promise<void>, RootState, unknown, AnyAction> =>
   async (dispatch, getState) => {
     const state = getState();
     const cachedPage = state.mailings.pages[page];
@@ -40,25 +40,28 @@ export const fetchMailings =
           )
         );
       } catch (error) {
-        if (error instanceof Error)
-          dispatch(fetchMailingsFailure(error.message));
+        if (error instanceof Error) dispatch(mailingsFailure(error.message));
       }
     }
   };
 
 export const createMailing =
-  (mailing: Mailing): ThunkAction<void, RootState, unknown, AnyAction> =>
+  (
+    mailing: Mailing
+  ): ThunkAction<Promise<void>, RootState, unknown, AnyAction> =>
   async (dispatch) => {
     try {
       const response = await addMailingApi(mailing);
       dispatch(addMailing(response));
     } catch (error) {
-      if (error instanceof Error) dispatch(fetchMailingsFailure(error.message));
+      throw error;
     }
   };
 
 export const modifyMailing =
-  (mailing: Mailing): ThunkAction<void, RootState, unknown, AnyAction> =>
+  (
+    mailing: Mailing
+  ): ThunkAction<Promise<void>, RootState, unknown, AnyAction> =>
   async (dispatch) => {
     try {
       const response = await updateMailingApi(mailing);
@@ -66,7 +69,7 @@ export const modifyMailing =
         dispatch(updateMailing(mailing));
       }
     } catch (error) {
-      if (error instanceof Error) dispatch(fetchMailingsFailure(error.message));
+      throw error;
     }
   };
 
@@ -77,6 +80,6 @@ export const removeMailingById =
       await deleteMailingApi(id);
       dispatch(removeMailing(id));
     } catch (error) {
-      if (error instanceof Error) dispatch(fetchMailingsFailure(error.message));
+      if (error instanceof Error) dispatch(mailingsFailure(error.message));
     }
   };

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from './MailingsTable.module.css';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../redux/store';
+import { AppDispatch, RootState } from '../../redux/store';
 import {
   Table,
   TableBody,
@@ -29,7 +29,10 @@ import {
 } from '../../redux/actions/mailingsActions';
 import { getGiftCardsByIdsApi } from '../../api/apiGiftCards';
 import { saveGiftCards } from '../../redux/actions/giftsActions';
-import { setCurrentPage } from '../../redux/slices/mailingsSlice';
+import {
+  mailingsFailure,
+  setCurrentPage,
+} from '../../redux/slices/mailingsSlice';
 import { LIMIT_ROWS } from '../../constants';
 import ErrorSnackbar from '../SnackBars/ErrorSnackbar';
 
@@ -41,7 +44,7 @@ const MailingsTable: React.FC = () => {
   const totalPages = useSelector(
     (state: RootState) => state.mailings.totalMailings
   );
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const [editingMailing, setEditingMailing] = useState<Mailing | null>(null);
   const [confirmMoalOpen, setConfirmMoalOpen] = useState<boolean>(false);
   const [formOpen, setFormOpen] = useState<boolean>(false);
@@ -90,15 +93,20 @@ const MailingsTable: React.FC = () => {
   };
 
   //@Add mailing rollback on error
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editingMailing) {
-      const isExist = isExistMailing(editingMailing.id);
-      isExist
-        ? dispatch(modifyMailing(editingMailing))
-        : dispatch(createMailing(editingMailing));
-      dispatch(fetchMailings(currentPage, LIMIT_ROWS));
-      handleShowConfirmation();
-      handleShowForm();
+      try {
+        const isExist = isExistMailing(editingMailing.id);
+        isExist
+          ? await dispatch(modifyMailing(editingMailing))
+          : await dispatch(createMailing(editingMailing));
+        await dispatch(fetchMailings(currentPage, LIMIT_ROWS));
+      } catch (error) {
+        if (error instanceof Error) dispatch(mailingsFailure(error.message));
+      } finally {
+        handleShowConfirmation();
+        handleShowForm();
+      }
     }
   };
 
