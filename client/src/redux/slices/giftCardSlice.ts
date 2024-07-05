@@ -37,7 +37,7 @@ export const fetchGiftCardsSuccess = (giftCards: GiftCard[]) => ({
 });
 
 export const fetchCurrentGiftCards = (currentGiftCards: GiftCard[]) => ({
-  type: FETCH_GIFT_CARDS_SUCCESS,
+  type: CURRENT_GIFT_CARDS,
   payload: currentGiftCards,
 });
 

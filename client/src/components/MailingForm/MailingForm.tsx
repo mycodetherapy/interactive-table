@@ -30,13 +30,14 @@ const MailingForm: React.FC<MailingFormProps> = ({
   const currentGiftCards = useSelector(
     (state: RootState) => state.giftCards.currentGiftCards
   );
+  const mailingGifts = initialValues.gifts;
 
   useEffect(() => {
-    if (initialValues.gifts.length) {
-      const ids = initialValues.gifts.map((gift) => gift.giftCardId);
+    if (mailingGifts.length) {
+      const ids = mailingGifts.map((gift) => gift.giftCardId);
       dispatch(fetchGiftCardsByIds(ids));
     }
-  }, [dispatch, initialValues]);
+  }, [dispatch, mailingGifts]);
 
   useEffect(() => {
     return () => onClose();

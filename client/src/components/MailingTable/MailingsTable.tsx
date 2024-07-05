@@ -89,12 +89,14 @@ const MailingsTable: React.FC = () => {
     }
   };
 
+  //@Add mailing rollback on error
   const handleSave = () => {
     if (editingMailing) {
       const isExist = isExistMailing(editingMailing.id);
       isExist
         ? dispatch(modifyMailing(editingMailing))
         : dispatch(createMailing(editingMailing));
+      dispatch(fetchMailings(currentPage, LIMIT_ROWS));
       handleShowConfirmation();
       handleShowForm();
     }
